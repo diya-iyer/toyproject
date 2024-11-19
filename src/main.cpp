@@ -1,64 +1,44 @@
 #include <Arduino.h>
 #include <CapacitiveSensor.h>
 
-// Define LED pins
-    // #define GREEN_LED 3
-    // #define RED_LED 5
-    // #define BLUE_LED 6
-    // #define PURPLE_LED 9
-    // #define WHITE_LED 10
-
-// Define pressure sensor pins
-CapacitiveSensor CAP_SENSOR_CIRCLE = CapacitiveSensor(2, 3); 
-#define PRESSURE_SENSOR_GREEN (2, 3);
-#define PRESSURE_SENSOR_RED (5,6)
-#define PRESSURE_SENSOR_BLUE (8,9)
-// #define PRESSURE_SENSOR_PURPLE A3
-// #define PRESSURE_SENSOR_WHITE A4
+// Define capacitive sensors for shapes
+CapacitiveSensor capSensorCircle = CapacitiveSensor(2, 3);   // Circle
+CapacitiveSensor capSensorSquare = CapacitiveSensor(4, 5);   // Square
+CapacitiveSensor capSensorTriangle = CapacitiveSensor(6, 7); // Triangle
 
 // Define speaker pin
-#define SPEAKER_PIN 11
+#define SPEAKER_PIN 12
 
-// Threshold for pressure sensor to detect a press
-const int pressureThreshold = 1000;
+// Threshold for capacitive sensor activation
+const long pressureThreshold = 1000;
 
 // Variables to track game state
-int activeTask = -1;  // Current task (0=Green, 1=Red, etc.)
+int activeTask = -1;  // Current task (0=Circle, 1=Square, 2=Triangle)
 bool gameActive = false;
 
-// Predefined messages (these could map to sound effects in a future MP3 system)
-const char* shapes[5] = {"star", "circle", "triangle", "square", "heart"};
-const char* colors[5] = {"green", "red", "blue", "purple", "white"};
+// Predefined messages for shapes
+const char* shapes[3] = {"circle", "square", "triangle"};
 
-// Start a new task by selecting a random button and lighting its LED
+// Start a new task by selecting a random shape
 void startNewTask() {
-  activeTask = random(0, 5);  // Random number between 0 and 4
+  activeTask = random(0, 3);  // Random number between 0 and 2
   gameActive = true;
 
-  // Announce the task (replace with sound)
-  Serial.print("Task: Press the ");
-  Serial.print(colors[activeTask]);
-  Serial.print(" ");
+  // Announce the task
+  Serial.print("Task: Press the "); // replace with recorded audio
   Serial.println(shapes[activeTask]);
-
-  // Highlight the correct LED
-  // lightUpLED(activeTask);
 }
 
-// Play positive sound 
+// Play positive sound
 void playPositiveSound() {
-  Serial.print("yay");
-  // tone(SPEAKER_PIN, 1000, 200);  // Frequency: 1000Hz, Duration: 200ms
-  // delay(250);
-  // tone(SPEAKER_PIN, 1200, 200);  // Frequency: 1200Hz, Duration: 200ms
+  tone(SPEAKER_PIN, 1000, 200);  // replace with recorded audio
+  delay(250);
 }
 
 // Play negative sound
 void playNegativeSound() {
-  Serial.print("naurrr");
-  // tone(SPEAKER_PIN, 400, 200);  // Frequency: 400Hz, Duration: 200ms
-  // delay(250);
-  // tone(SPEAKER_PIN, 300, 200);  // Frequency: 300Hz, Duration: 200ms
+  tone(SPEAKER_PIN, 400, 200);  // replace with recorded audio
+  delay(250);
 }
 
 // Handle button press
@@ -69,91 +49,52 @@ void handleButtonPress(int button) {
     // Correct button press
     playPositiveSound();
     Serial.print("Correct! You pressed the ");
-    Serial.println(colors[button]);
+    Serial.println(shapes[button]);
     gameActive = false;
 
-    // Wait briefly and start a new task
-    delay(1000);
-    // turnOffAllLEDs();
-    startNewTask();
   } else {
     // Incorrect button press
     playNegativeSound();
     Serial.print("Incorrect! You pressed the ");
-    Serial.println(colors[button]);
+    Serial.println(shapes[button]);
   }
+
+      // Wait briefly and start a new task
+    delay(1000);
+    startNewTask();
 }
 
 void setup() {
-  // Initialize LED pins as outputs
-  // pinMode(GREEN_LED, OUTPUT);
-  // pinMode(RED_LED, OUTPUT);
-  // pinMode(BLUE_LED, OUTPUT);
-  // pinMode(PURPLE_LED, OUTPUT);
-  // pinMode(WHITE_LED, OUTPUT);
-
-  // Initialize pressure sensor pins as inputs
-  
-  //pinMode(PRESSURE_SENSOR_GREEN, INPUT);
-  pinMode(PRESSURE_SENSOR_RED, INPUT);
-  pinMode(PRESSURE_SENSOR_BLUE, INPUT);
-  // pinMode(PRESSURE_SENSOR_PURPLE, INPUT);
-  // pinMode(PRESSURE_SENSOR_WHITE, INPUT);
-
   // Initialize speaker pin as output
   pinMode(SPEAKER_PIN, OUTPUT);
 
   // Begin serial communication for debugging
   Serial.begin(9600);
 
-  // Start the game
+  // Start the first task
   startNewTask();
 }
 
 void loop() {
-  // Read the pressure sensor values
-  //int greenSensorValue = analogRead(PRESSURE_SENSOR_GREEN);
-  int redSensorValue = analogRead(PRESSURE_SENSOR_RED);
-  int blueSensorValue = analogRead(PRESSURE_SENSOR_BLUE);
-  // int purpleSensorValue = analogRead(PRESSURE_SENSOR_PURPLE);
-  // int whiteSensorValue = analogRead(PRESSURE_SENSOR_WHITE);
- 
-  long sensorValue = CAP_SENSOR_CIRCLE.capacitiveSensor(30); 
-   Serial.println(sensorValue);
-  // Check if each sensor is pressed
-  if ( sensorValue > pressureThreshold) {
-    handleButtonPress(0);
-  } else if (redSensorValue > pressureThreshold) {
-    handleButtonPress(1);
-  } else if (blueSensorValue > pressureThreshold) {
-    handleButtonPress(2);
+  // Read the capacitive sensor values
+  long circleValue = capSensorCircle.capacitiveSensor(30);
+  long squareValue = capSensorSquare.capacitiveSensor(30);
+  long triangleValue = capSensorTriangle.capacitiveSensor(30);
+
+  // Debugging: Print sensor values
+  Serial.print("Circle: "); Serial.print(circleValue);
+  Serial.print(" Square: "); Serial.print(squareValue);
+  Serial.print(" Triangle: "); Serial.println(triangleValue);
+
+  // Check if a shape's sensor is activated
+  if (circleValue > pressureThreshold) {
+    handleButtonPress(0); // Circle
+  } else if (squareValue > pressureThreshold) {
+    handleButtonPress(1); // Square
+  } else if (triangleValue > pressureThreshold) {
+    handleButtonPress(2); // Triangle
   }
-//   } else if (purpleSensorValue > pressureThreshold) {
-//     handleButtonPress(3);
-//   } else if (whiteSensorValue > pressureThreshold) {
-//     handleButtonPress(4);
-//   }
+
+  // Small delay to avoid rapid triggering
+  delay(50);
 }
-
-
-
-// Turn on a specific LED based on the task
-// void lightUpLED(int task) {
-//   turnOffAllLEDs();
-//   switch (task) {
-//     case 0: digitalWrite(GREEN_LED, HIGH); break;
-//     case 1: digitalWrite(RED_LED, HIGH); break;
-//     case 2: digitalWrite(BLUE_LED, HIGH); break;
-//     case 3: digitalWrite(PURPLE_LED, HIGH); break;
-//     case 4: digitalWrite(WHITE_LED, HIGH); break;
-//   }
-// }
-
-// Turn off all LEDs
-// void turnOffAllLEDs() {
-//   digitalWrite(GREEN_LED, LOW);
-//   digitalWrite(RED_LED, LOW);
-//   digitalWrite(BLUE_LED, LOW);
-//   digitalWrite(PURPLE_LED, LOW);
-//   digitalWrite(WHITE_LED, LOW);
-// }
