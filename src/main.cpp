@@ -2,9 +2,13 @@
 #include <CapacitiveSensor.h>
 
 // Define capacitive sensors for shapes
-CapacitiveSensor capSensorCircle = CapacitiveSensor(2, 3);   // Circle
-CapacitiveSensor capSensorSquare = CapacitiveSensor(4, 5);   // Square
-CapacitiveSensor capSensorTriangle = CapacitiveSensor(6, 7); // Triangle
+// CapacitiveSensor capSensorCircle = CapacitiveSensor(2, 3);   // Circle
+// CapacitiveSensor capSensorSquare = CapacitiveSensor(4, 5);   // Square
+// CapacitiveSensor capSensorTriangle = CapacitiveSensor(6, 7); // Triangle
+
+CapacitiveSensor capSensorHeart = CapacitiveSensor(3, 2);   // Heart
+CapacitiveSensor capSensorSquare = CapacitiveSensor(6, 5);   // Square
+CapacitiveSensor capSensorTriangle = CapacitiveSensor(9, 8); // Triangle
 
 // Define speaker pin
 #define SPEAKER_PIN 12
@@ -17,7 +21,7 @@ int activeTask = -1;  // Current task (0=Circle, 1=Square, 2=Triangle)
 bool gameActive = false;
 
 // Predefined messages for shapes
-const char* shapes[3] = {"circle", "square", "triangle"};
+const char* shapes[3] = {"heart", "square", "triangle"};
 
 // Start a new task by selecting a random shape
 void startNewTask() {
@@ -77,17 +81,17 @@ void setup() {
 
 void loop() {
   // Read the capacitive sensor values
-  long circleValue = capSensorCircle.capacitiveSensor(30);
+  long heartValue = capSensorHeart.capacitiveSensor(30);
   long squareValue = capSensorSquare.capacitiveSensor(30);
   long triangleValue = capSensorTriangle.capacitiveSensor(30);
 
   // Debugging: Print sensor values
-  Serial.print("Circle: "); Serial.print(circleValue);
-  Serial.print(" Square: "); Serial.print(squareValue);
-  Serial.print(" Triangle: "); Serial.println(triangleValue);
+  // Serial.print("Heart: "); Serial.print(heartValue);
+  // Serial.print(" Square: "); Serial.print(squareValue);
+  // Serial.print(" Triangle: "); Serial.println(triangleValue);
 
   // Check if a shape's sensor is activated
-  if (circleValue > pressureThreshold) {
+  if (heartValue > pressureThreshold) {
     handleButtonPress(0); // Circle
   } else if (squareValue > pressureThreshold) {
     handleButtonPress(1); // Square
